@@ -39,12 +39,13 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.getAllReservations());
     }
 
-    @PutMapping("/update")
+    @PutMapping("/{id}/update")
     public ResponseEntity<Reservation> updateReservation(
+            @PathVariable Long id,
             @RequestBody Reservation reservation
     ) {
         logger.info("Updating reservation #{}", reservation.id());
-        return ResponseEntity.ok(reservationService.updateReservation(reservation));
+        return ResponseEntity.ok(reservationService.updateReservation(id, reservation));
     }
 
     @DeleteMapping("/{id}")

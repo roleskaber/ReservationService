@@ -1,5 +1,6 @@
 package com.demo.demo.reservations.db;
 
+import com.demo.demo.reservations.domain.Reservation;
 import com.demo.demo.reservations.domain.ReservationStatus;
 import jakarta.persistence.*;
 
@@ -27,6 +28,7 @@ public class ReservationEntity {
 
     public ReservationEntity() {
     }
+
 
     public ReservationEntity(Long id, Long userId, Long roomId, LocalDate startDate, LocalDate endDate, ReservationStatus status) {
         this.id = id;
@@ -83,5 +85,16 @@ public class ReservationEntity {
 
     public void setStatus(ReservationStatus status) {
         this.status = status;
+    }
+
+    public Reservation toDomain() {
+        return new Reservation(
+                this.id,
+                this.userId,
+                this.roomId,
+                this.startDate,
+                this.endDate,
+                this.status
+        );
     }
 }

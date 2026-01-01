@@ -21,11 +21,11 @@ public class ReservationService {
 
     public Reservation getReservationById(Long id) {
         ReservationEntity find = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Entity with id {} not found"));
-        return toDomain(find);
+        return find.toDomain();
     }
 
     public List<Reservation> getAllReservations() {
-        return repository.findAll().stream().map(this::toDomain).toList();
+        return repository.findAll().stream().map(ReservationEntity::toDomain).toList();
     }
 
     public Reservation createReservation(Reservation reservation) {
@@ -36,18 +36,21 @@ public class ReservationService {
         ReservationEntity entity = toEntity(reservation);
         entity.setStatus(ReservationStatus.PENDING);
         var saved = repository.save(entity);
-        return toDomain(saved);
+        return saved.toDomain();
     }
 
 
-    public Reservation updateReservation(Reservation reservation) {
-        checkReservationExists(reservation.id());
+    public Reservation updateReservation(Long id, Reservation reservation) {
+        checkReservationExists(id);
         checkReservationDatesValid(reservation);
-        var oldReservation = this.getReservationById(reservation.id());
+        var oldReservation = this.getReservationById(id);
         if (oldReservation.status() != ReservationStatus.PENDING) {
             throw new IllegalStateException("");
         }
-        return toDomain(repository.save(toEntity(reservation)));
+        ReservationEntity updatedReservation = toEntity(reservation);
+        updatedReservation.setId(id);
+        updatedReservation.setStatus(ReservationStatus.PENDING);
+        return repository.save(updatedReservation).toDomain();
     }
 
     public void deleteReservation(Long id) {
@@ -81,10 +84,6 @@ public class ReservationService {
 
     private ReservationEntity toEntity(Reservation re) {
         return new ReservationEntity(null, re.userId(), re.roomId(), re.startDate(), re.endDate(), re.status());
-    }
-
-    private Reservation toDomain(ReservationEntity it) {
-        return new Reservation(it.getId(), it.getUserId(), it.getRoomId(), it.getStartDate(), it.getEndDate(), it.getStatus());
     }
 
 }
