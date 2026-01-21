@@ -2,10 +2,12 @@ package com.demo.demo.security.jwt;
 
 import com.demo.demo.security.CustomUserDetails;
 import com.demo.demo.security.CustomUserService;
+import com.demo.demo.security.db.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,9 +22,9 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final CustomUserService customUserService;
 
-    public JwtFilter() {
-        this.jwtService = new JwtService();
-        this.customUserService = new CustomUserService();
+    public JwtFilter(JwtService jwtService, CustomUserService customUserService) {
+        this.jwtService = jwtService;
+        this.customUserService = customUserService;
     }
 
     @Override
@@ -33,6 +35,7 @@ public class JwtFilter extends OncePerRequestFilter {
         if (token != null && jwtService.validateJwtToken(token)) {
             setCustomUserDetailsToSecurityContextHeader(token);
         }
+        filterChain.doFilter(request, response);
 
     }
 

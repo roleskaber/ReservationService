@@ -34,7 +34,7 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
                              @Param("status") ReservationStatus status);
 
     @Query("""
-            select e.id from ReservationEntity e
+            select e from ReservationEntity e
             where (:roomId is null or e.roomId = :roomId)
             and (:userId is null or e.userId = :userId)
             """)

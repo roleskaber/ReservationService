@@ -9,7 +9,6 @@ import java.util.NoSuchElementException;
 
 public interface IUserService {
     JwtAuthDto refreshToken(RefreshTokenDto refreshToken);
-    UserCredentialsDto getUserById(Long id, String auth) throws NoSuchElementException;
-    UserCredentialsDto getUserByEmail(String email, String auth) throws NoSuchElementException;
+    UserCredentialsDto getUser(String auth) throws NoSuchElementException;
     JwtAuthDto addUser(UserCredentialsDto userCredentials);
 }

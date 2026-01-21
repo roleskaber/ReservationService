@@ -22,29 +22,22 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/id/{id}")
+    @GetMapping("/")
     public ResponseEntity<UserCredentialsDto> getUserCredentialsById (
-            @PathVariable Long id,
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization
-            ) {
-        return ResponseEntity.ok(userService.getUserById(id, authorization.substring(7)));
-    }
-
-    @GetMapping("/email/{email}")
-    public ResponseEntity<UserCredentialsDto> getUserCredentialsByEmail (
-            @PathVariable String email,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization
     ) {
-        return ResponseEntity.ok(userService.getUserByEmail(email, authorization));
+        return ResponseEntity.ok(userService.getUser(authorization.substring(7)));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<JwtAuthDto> postUserCredentials (UserCredentialsDto userCredentialsDto) {
+    public ResponseEntity<JwtAuthDto> postUserCredentials (
+            @RequestBody UserCredentialsDto userCredentialsDto
+    ) {
         return ResponseEntity.ok(userService.addUser(userCredentialsDto));
     }
 
     @PostMapping("/token/refresh")
-    public ResponseEntity<JwtAuthDto> updateUserToken (RefreshTokenDto dto) {
+    public ResponseEntity<JwtAuthDto> updateUserToken (@RequestBody RefreshTokenDto dto) {
         return ResponseEntity.ok(userService.refreshToken(dto));
     }
 

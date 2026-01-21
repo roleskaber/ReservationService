@@ -7,14 +7,15 @@ import com.demo.demo.security.dto.RefreshTokenDto;
 import com.demo.demo.security.dto.UserCredentialsDto;
 import com.demo.demo.security.jwt.JwtService;
 import jakarta.transaction.Transactional;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
 import java.util.NoSuchElementException;
-import java.util.Objects;
+
 
 @Service
 public class UserService implements IUserService {
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final JwtService jwtService;
     private final UserRepository userRepository;
 
@@ -31,30 +32,20 @@ public class UserService implements IUserService {
 
     @Override
     @Transactional
-    public UserCredentialsDto getUserById(Long id, String auth) throws NoSuchElementException {
-        UserEntity expected_user = userRepository.getUserEntityById(id);
+    public UserCredentialsDto getUser(String auth) throws NoSuchElementException {
         String email_token = jwtService.getEmailFromToken(auth);
-        UserEntity real_user = userRepository.getUserEntityByEmail(email_token);
-        if (expected_user == real_user) {
-            return expected_user.toDto();
+        UserEntity user = userRepository.getUserEntityByEmail(email_token);
+        if (user == null) {
+            throw new NoSuchElementException("Us not found");
         }
-        throw new NoSuchElementException("Us not found");
-    }
-
-    @Override
-    @Transactional
-    public UserCredentialsDto getUserByEmail(String email, String auth) throws NoSuchElementException {
-        String email_token = jwtService.getEmailFromToken(auth);
-        if (Objects.equals(email_token, email)) {
-            return userRepository.getUserEntityByEmail(email).toDto();
-        }
-        throw new NoSuchElementException("Us not found");
+        return user.toDto();
     }
 
     @Override
     @Transactional
     public JwtAuthDto addUser(UserCredentialsDto userCredentials) {
         var result = userRepository.save(userCredentials.toEntity());
+        logger.info(result.getEmail());
         return new JwtAuthDto(
                 jwtService.generateJwtToken(result.getEmail()),
                 jwtService.generateRefreshToken(result.getEmail())
