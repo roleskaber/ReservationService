@@ -1,11 +1,13 @@
 package com.demo.demo.reservations.api;
 
+import com.demo.demo.reservations.db.ReservationFilter;
 import com.demo.demo.reservations.domain.Reservation;
 import com.demo.demo.reservations.db.ReservationEntity;
 import com.demo.demo.reservations.db.ReservationRepository;
 import com.demo.demo.reservations.domain.ReservationStatus;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,8 +26,21 @@ public class ReservationService {
         return find.toDomain();
     }
 
-    public List<Reservation> getAllReservations() {
-        return repository.findAll().stream().map(ReservationEntity::toDomain).toList();
+    public List<Reservation> getAllReservations(ReservationFilter filter) {
+        int pageSize = filter.pageSize() != null ?
+                filter.pageSize() : 10;
+        int pageNum = filter.pageNum() != null ?
+                filter.pageNum() : 0;
+        var pageable = Pageable.ofSize(pageSize).withPage(pageNum);
+        List<ReservationEntity> query = repository.findAllByParams(
+                filter.roomId(),
+                filter.userId(),
+                pageable
+        );
+        return query
+                .stream()
+                .map(ReservationEntity::toDomain)
+                .toList();
     }
 
     public Reservation createReservation(Reservation reservation) {
@@ -33,7 +48,7 @@ public class ReservationService {
             throw new IllegalArgumentException("Status should be empty");
         }
         checkReservationDatesValid(reservation);
-        ReservationEntity entity = toEntity(reservation);
+        ReservationEntity entity = reservation.toEntity();
         entity.setStatus(ReservationStatus.PENDING);
         var saved = repository.save(entity);
         return saved.toDomain();
@@ -47,7 +62,7 @@ public class ReservationService {
         if (oldReservation.status() != ReservationStatus.PENDING) {
             throw new IllegalStateException("");
         }
-        ReservationEntity updatedReservation = toEntity(reservation);
+        ReservationEntity updatedReservation = reservation.toEntity();
         updatedReservation.setId(id);
         updatedReservation.setStatus(ReservationStatus.PENDING);
         return repository.save(updatedReservation).toDomain();
@@ -81,9 +96,4 @@ public class ReservationService {
             throw new IllegalArgumentException("End Date has to be valid");
         }
     }
-
-    private ReservationEntity toEntity(Reservation re) {
-        return new ReservationEntity(null, re.userId(), re.roomId(), re.startDate(), re.endDate(), re.status());
-    }
-
 }

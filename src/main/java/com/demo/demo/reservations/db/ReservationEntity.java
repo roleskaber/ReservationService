@@ -29,7 +29,6 @@ public class ReservationEntity {
     public ReservationEntity() {
     }
 
-
     public ReservationEntity(Long id, Long userId, Long roomId, LocalDate startDate, LocalDate endDate, ReservationStatus status) {
         this.id = id;
         this.userId = userId;

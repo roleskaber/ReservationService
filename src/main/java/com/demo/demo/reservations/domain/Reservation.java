@@ -1,5 +1,6 @@
 package com.demo.demo.reservations.domain;
 
+import com.demo.demo.reservations.db.ReservationEntity;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
@@ -22,4 +23,14 @@ public record Reservation(
         LocalDate endDate,
         ReservationStatus status
 ) {
+        public ReservationEntity toEntity() {
+                return new ReservationEntity(
+                        null,
+                        this.userId,
+                        this.roomId,
+                        this.startDate,
+                        this.endDate,
+                        this.status
+                );
+        }
 }

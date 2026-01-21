@@ -1,5 +1,6 @@
 package com.demo.demo.reservations.api;
 
+import com.demo.demo.reservations.db.ReservationFilter;
 import com.demo.demo.reservations.domain.Reservation;
 import jakarta.validation.Valid;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,7 @@ public class ReservationController {
     @PostMapping("/add")
     public ResponseEntity<Reservation> createReservation(
             @RequestBody @Valid Reservation reservation
-            ) {
+    ) {
         logger.info("Started creating reservation");
         var saved_reservation = reservationService.createReservation(reservation);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -34,9 +35,17 @@ public class ReservationController {
 
     @GetMapping("/all")
     public ResponseEntity<List<Reservation>> getALlReservationById(
+            @RequestParam(required = false) Long roomId,
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) Integer pageSize,
+            @RequestParam(required = false) Integer pageNum
     ) {
+
+        var filter = new ReservationFilter(
+                roomId, userId, pageSize, pageNum
+        );
         logger.info("GET /reservation/all");
-        return ResponseEntity.ok(reservationService.getAllReservations());
+        return ResponseEntity.ok(reservationService.getAllReservations(filter));
     }
 
     @PutMapping("/{id}/update")

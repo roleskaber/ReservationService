@@ -1,6 +1,7 @@
 package com.demo.demo.reservations.db;
 
 import com.demo.demo.reservations.domain.ReservationStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -27,6 +28,17 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
             and :endDate > e.endDate
             and e.status = :status
             """)
-    List<Long> findConflicts(@Param("roomId") Long roomId, @Param("startDate") Long startDate, @Param("endDate") Long endDate, @Param("status") ReservationStatus status);
+    List<Long> findConflicts(@Param("roomId") Long roomId,
+                             @Param("startDate") Long startDate,
+                             @Param("endDate") Long endDate,
+                             @Param("status") ReservationStatus status);
 
+    @Query("""
+            select e.id from ReservationEntity e
+            where (:roomId is null or e.roomId = :roomId)
+            and (:userId is null or e.userId = :userId)
+            """)
+    List<ReservationEntity> findAllByParams(@Param("roomId") Long roomId,
+                                            @Param("userId") Long userId,
+                                            Pageable pageable);
 }
