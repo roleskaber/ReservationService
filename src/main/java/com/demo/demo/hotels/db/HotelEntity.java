@@ -21,7 +21,7 @@ public class HotelEntity {
     String country;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "hotel_id")
-    List<HotelRoom> hotelRoom;
+    List<HotelRoomEntity> hotelRoomEntity;
     @Column(name = "amenities")
     List<HotelAmenities> amenities;
 
@@ -33,19 +33,67 @@ public class HotelEntity {
                        String name,
                        String address,
                        String country,
-                       List<HotelRoom> hotelRoom,
+                       List<HotelRoomEntity> hotelRoomEntity,
                        List<HotelAmenities> amenities) {
         this.id = id;
         this.name = name;
         this.address = address;
         this.country = country;
-        this.hotelRoom = hotelRoom;
+        this.hotelRoomEntity = hotelRoomEntity;
         this.amenities = amenities;
     }
 
         public HotelDto toDto() {
         return new HotelDto(
-                id, name, address, country, hotelRoom, amenities
+                id, name, address, country, hotelRoomEntity, amenities
         );
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public List<HotelRoomEntity> getHotelRoomEntity() {
+        return hotelRoomEntity;
+    }
+
+    public void setHotelRoomEntity(List<HotelRoomEntity> hotelRoomEntity) {
+        this.hotelRoomEntity = hotelRoomEntity;
+    }
+
+    public List<HotelAmenities> getAmenities() {
+        return amenities;
+    }
+
+    public void setAmenities(List<HotelAmenities> amenities) {
+        this.amenities = amenities;
     }
 }

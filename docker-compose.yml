@@ -21,12 +21,12 @@ services:
     environment:
       discovery.type: 'single-node'
       xpack.security.enabled: 'true'
-      ELASTIC_PASSWORD: '<your_password>'
+      ELASTIC_PASSWORD: '12345'
       ES_JAVA_OPTS: '-Xmx2g -Xms2g'
   kibana:
     image: kibana:7.8.1
     volumes:
-      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+      - ./elastic/kibana.yml:/usr/share/kibana/config/kibana.yml
     ports:
       - 5601:5601
 volumes:
