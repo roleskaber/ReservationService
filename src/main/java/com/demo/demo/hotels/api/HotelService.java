@@ -10,7 +10,6 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.io.IOException;
 import java.util.List;
@@ -38,9 +37,9 @@ public class HotelService implements IHotelService {
     }
 
     @Override
-    public List<HotelEntity> doElasticSearch(String hint, int size) {
+    public List<HotelEntity> doElasticSearch(String hint, int size, int page) {
         try {
-            return elasticSearchService.getElasticResults(hint, size);
+            return elasticSearchService.processElasticRequest(hint, size, page);
         } catch (IOException | InterruptedException e) {
             logger.error(e.toString());
         }

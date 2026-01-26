@@ -9,7 +9,7 @@ import java.util.List;
 public interface IHotelService {
     HotelEntity addHotel(HotelDto hotelDto);
     List<HotelEntity> getHotelsByParams();
-    List<HotelEntity> doElasticSearch(String hint, int size);
+    List<HotelEntity> doElasticSearch(String hint, int size, int page);
     HotelEntity getHotelById(Long id);
     void deleteHotel(Long id);
     List<HotelRoomEntity> getRoomsByHotel(Long id);

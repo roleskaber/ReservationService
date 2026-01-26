@@ -1,5 +1,5 @@
 package com.demo.demo.hotels.db;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.demo.demo.hotels.domain.HotelAmenities;
 import com.demo.demo.hotels.dto.HotelDto;
 import jakarta.persistence.*;
@@ -8,6 +8,7 @@ import java.util.List;
 
 @Table(name="hotels")
 @Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class HotelEntity {
     @Id
     @Column(name="id")

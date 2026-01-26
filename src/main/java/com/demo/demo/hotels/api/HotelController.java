@@ -30,10 +30,13 @@ public class HotelController {
         return ResponseEntity.ok(hotelService.getHotelsByParams());
     }
 
-    @GetMapping("/search?hint={hint}&size={size}")
-    public ResponseEntity<List<HotelEntity>> searchHotels(@PathVariable String hint,
-                                                          @PathVariable int size) {
-        return ResponseEntity.ok(hotelService.doElasticSearch(hint, size));
+    @GetMapping("/search")
+    public ResponseEntity<List<HotelEntity>> searchHotels(
+            @RequestParam String hint,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "1") int page
+    ) {
+        return ResponseEntity.ok(hotelService.doElasticSearch(hint, size, page));
     }
 
     @GetMapping("/{id}")

@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -15,56 +17,56 @@ import java.time.Duration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ElasticSearchService {
-    private final String ELASTIC_URL = System.getenv("ELASTIC_URL");
+
+    private final Map<String, String> var = System.getenv();
     private final HttpClient client = HttpClient.newBuilder()
+            .authenticator(new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(
+                            var.get("ELASTIC_USERNAME"),
+                            var.get("ELASTIC_PASSWORD").toCharArray()
+                    );
+                }
+            })
             .connectTimeout(Duration.ofSeconds(15))
             .build();
 
-    private String processElasticRequest(String hint)
+    private List<HotelEntity> serializeResult(String body) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(body);
+        JsonNode hits = root.path("hits").path("hits");
+
+        List<HotelEntity> hotels = new ArrayList<>();
+        for (JsonNode hit : hits) {
+            JsonNode source = hit.path("_source");
+            HotelEntity hotel = mapper.treeToValue(source, HotelEntity.class);
+            hotels.add(hotel);
+        }
+        return hotels;
+    }
+
+    public List<HotelEntity> processElasticRequest(String hint, int size, int page)
             throws IOException, InterruptedException {
-        String jsonBody = """
-                {
-                  "query": {
-                    "match": {
-                      "name": "%s"
-                    }
-                  }
-                }
-                """;
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(ELASTIC_URL + "/_search"))
-                .header("Authorization", "Bearer ")
+                .uri(URI.create(var.get("ELASTIC_URL") + "/hotels/_search"))
+                .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(
-                        jsonBody.formatted(hint))
-                )
+                        ElasticSearchRequestBody.getQueryObj(hint,
+                                page,
+                                size)
+                ))
                 .build();
         HttpResponse<String> response = client.send(
                 request,
                 HttpResponse.BodyHandlers.ofString()
         );
-        return response.body();
+        return serializeResult(response.body());
     }
-
-    private List<HotelEntity> serializeResult(String body)
-            throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode root = mapper.readTree(body);
-        JsonNode hits = root.path("hits").path("hits");
-        return mapper.readValue(
-                hits.toString(),
-                new TypeReference<List<HotelEntity>>() {}
-        );
-    }
-
-    public List<HotelEntity> getElasticResults(String hint, int size)
-            throws IOException, InterruptedException {
-        String response = this.processElasticRequest(hint);
-        return serializeResult(response).subList(0, size - 1);
-    }
-
-
 }
